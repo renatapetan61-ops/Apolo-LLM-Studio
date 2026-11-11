@@ -25,6 +25,12 @@ if (gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = tr
     )
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
 android {
     namespace = "com.apolo.llmstudio"
     compileSdk = 36
