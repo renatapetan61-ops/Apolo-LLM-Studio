@@ -32,6 +32,46 @@ The Android SDK integration follows the official [Clerk Android quickstart](http
 
 Open `android/` in Android Studio and build the `app` debug variant, or run `gradle -p android :app:assembleDebug` with Gradle 8.13+ installed. Add the publishable key to local `gradle.properties` first. A placeholder is used only to allow CI compilation without a real credential.
 
+## Create a signing key and build a signed APK
+
+Keep the upload keystore private and make at least two encrypted backups. Losing it can prevent updates from being signed with the same key. Do not send the keystore or passwords in chat or commit them to Git.
+
+1. From a trusted computer with JDK 17+, create a keystore (choose a strong password when prompted):
+
+```bash
+keytool -genkeypair -v -keystore apolo-upload.jks -keyalg RSA -keysize 4096 -validity 10000 -alias apolo-upload
+```
+
+2. Copy `apolo-upload.jks` into a private folder. Create `android/keystore.properties` from `android/keystore.properties.example`, then set:
+   - `storeFile`: absolute path to the JKS file
+   - `storePassword`: keystore password
+   - `keyAlias`: `apolo-upload`
+   - `keyPassword`: key password
+
+3. Confirm `android/keystore.properties` and the JKS are not staged in Git. They are excluded by `.gitignore`.
+
+4. Build the signed release APK:
+
+```bash
+gradle -p android :app:assembleRelease
+```
+
+5. The APK will be at:
+
+```
+android/app/build/outputs/apk/release/app-release.apk
+```
+
+6. Verify its signature:
+
+```bash
+$ANDROID_HOME/build-tools/36.0.0/apksigner verify --verbose --print-certs android/app/build/outputs/apk/release/app-release.apk
+```
+
+For Android Studio, use **Build > Generate Signed Bundle / APK > APK**, select the same keystore, alias and passwords, then choose the release build.
+
+**Important:** keep using the same signing key for every update distributed outside Google Play. If publishing through Google Play, use Play App Signing and protect the upload key separately. A debug APK is not a production release.
+
 ## Start the x86-64 development executor
 
 On a Linux x86-64 server:
@@ -60,4 +100,4 @@ The initial PTY worker is a development executor running inside its own containe
 
 ## Language strategy
 
-The requested 20 app / 25 executor languages will be introduced as supported toolchains, SDKs, adapters and test fixtures where useful. The first execution image prioritizes Bash, Python, Node.js, Go, Rust, C/C++ and Java. No unused languages will be added just to inflate a count.
+The requested 20 app / 25 executor languages will be introduced as supported toolchains, SDKs, adapters and test fixtures where useful. The first execution image prioritizes Bash, Python, Node.js, Go, Rust, C/C++ and Java. No unused languages will be added just to inflate the count.
