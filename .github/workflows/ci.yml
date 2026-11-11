@@ -36,6 +36,7 @@ jobs:
       APOLO_STORE_PASSWORD: ${{ secrets.APOLO_STORE_PASSWORD }}
       APOLO_KEY_ALIAS: ${{ secrets.APOLO_KEY_ALIAS }}
       APOLO_KEY_PASSWORD: ${{ secrets.APOLO_KEY_PASSWORD }}
+      APOLO_CLERK_PUBLISHABLE_KEY: ${{ secrets.APOLO_CLERK_PUBLISHABLE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - name: Check signed release eligibility
