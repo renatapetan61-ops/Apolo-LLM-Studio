@@ -60,7 +60,7 @@ jobs:
             -srckeystore android/apolo-upload.jks \
             -srcstorepass "$APOLO_STORE_PASSWORD" \
             -srcalias "$APOLO_KEY_ALIAS" \
-            -srckeypass "$APOLO_KEY_PASSWORD" \
+            -srckeypass "$APOLO_STORE_PASSWORD" \
             -destkeystore android/apolo-release.p12 \
             -deststoretype PKCS12 \
             -deststorepass "$APOLO_STORE_PASSWORD" \
