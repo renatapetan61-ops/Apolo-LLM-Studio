@@ -19,6 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -102,6 +105,8 @@ private fun ConfigurationRequired() {
 @Composable
 private fun StudioHome() {
     val scope = rememberCoroutineScope()
+    var apiCheckMessage by remember { mutableStateOf("Ainda não verificada nesta sessão.") }
+    var apiChecking by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF0B1020)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -119,9 +124,28 @@ private fun StudioHome() {
         }
         Text("Seu ambiente de desenvolvimento", color = Color.White, style = MaterialTheme.typography.titleMedium)
         Surface(color = Color(0xFF151E33), shape = RoundedCornerShape(16.dp)) {
-            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("API APOLO · RAILWAY", color = Color(0xFF77E0B5), style = MaterialTheme.typography.labelLarge)
                 Text(BuildConfig.API_BASE_URL, color = Color(0xFFE4EAF5))
+                Button(
+                    onClick = {
+                        scope.launch {
+                            apiChecking = true
+                            apiCheckMessage = try {
+                                ApoloApi.checkStatus()
+                            } catch (error: Exception) {
+                                "Falha na conexão: " + (error.message ?: "erro desconhecido")
+                            }
+                            apiChecking = false
+                        }
+                    },
+                    enabled = !apiChecking,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (apiChecking) CircularProgressIndicator()
+                    else Text("Testar conexão autenticada")
+                }
+                Text(apiCheckMessage, color = Color(0xFFB8C5DC))
             }
         }
         Surface(color = Color(0xFF151E33), shape = RoundedCornerShape(16.dp)) {
