@@ -35,26 +35,30 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                val authState by combine(Clerk.isInitialized, Clerk.userFlow) { ready, user ->
-                    when {
-                        !ready -> AuthState.Loading
-                        user == null -> AuthState.SignedOut
-                        else -> AuthState.SignedIn
-                    }
-                }.collectAsState(initial = AuthState.Loading)
-
-                when (authState) {
-                    AuthState.Loading -> androidx.compose.foundation.layout.Box(
-                        Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                    ) { CircularProgressIndicator() }
-                    AuthState.SignedOut -> Surface(Modifier.fillMaxSize()) {
-                        Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center) {
-                            Text("Apolo LLM Studio", style = MaterialTheme.typography.headlineMedium)
-                            Text("Entre para acessar seu ambiente Linux remoto.")
-                            AuthView()
+                if (!BuildConfig.CLERK_CONFIGURED || !ClerkRuntime.initialized) {
+                    ConfigurationRequired()
+                } else {
+                    val authState by combine(Clerk.isInitialized, Clerk.userFlow) { ready, user ->
+                        when {
+                            !ready -> AuthState.Loading
+                            user == null -> AuthState.SignedOut
+                            else -> AuthState.SignedIn
                         }
+                    }.collectAsState(initial = AuthState.Loading)
+
+                    when (authState) {
+                        AuthState.Loading -> androidx.compose.foundation.layout.Box(
+                            Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                        ) { CircularProgressIndicator() }
+                        AuthState.SignedOut -> Surface(Modifier.fillMaxSize()) {
+                            Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center) {
+                                Text("Apolo LLM Studio", style = MaterialTheme.typography.headlineMedium)
+                                Text("Entre para acessar seu ambiente Linux remoto.")
+                                AuthView()
+                            }
+                        }
+                        AuthState.SignedIn -> StudioHome()
                     }
-                    AuthState.SignedIn -> StudioHome()
                 }
             }
         }
@@ -62,6 +66,38 @@ class MainActivity : ComponentActivity() {
 }
 
 private enum class AuthState { Loading, SignedOut, SignedIn }
+
+@Composable
+private fun ConfigurationRequired() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFF0B1020)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text("APOLO", color = Color(0xFF9AB7FF), style = MaterialTheme.typography.labelLarge)
+            Text("LLM Studio", color = Color.White, style = MaterialTheme.typography.headlineLarge)
+            Text(
+                "O aplicativo foi iniciado com segurança, mas o login ainda não está configurado.",
+                color = Color(0xFFE4EAF5),
+                modifier = Modifier.padding(top = 16.dp)
+            )
+            Text(
+                "Configure a chave Publishable do Clerk nas configurações do repositório GitHub (Actions Secrets) com o nome APOLO_CLERK_PUBLISHABLE_KEY e gere uma nova versão.",
+                color = Color(0xFFB8C5DC),
+                modifier = Modifier.padding(top = 12.dp)
+            )
+            Text(
+                "Nenhuma chave secreta deve ser colocada no aplicativo Android.",
+                color = Color(0xFFFFD18A),
+                modifier = Modifier.padding(top = 12.dp)
+            )
+        }
+    }
+}
 
 @Composable
 private fun StudioHome() {
