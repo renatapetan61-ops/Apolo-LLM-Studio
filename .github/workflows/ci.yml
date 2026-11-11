@@ -150,7 +150,7 @@ jobs:
           body: |
             APK Release assinado do Apolo LLM Studio.
 
-            - Versão Android: 0.1.1
+            - Versão Android: 0.1.3
             - Build do GitHub Actions: #${{ github.run_number }}
             - Commit: ${{ github.sha }}
           files: release-assets/app-release.apk
