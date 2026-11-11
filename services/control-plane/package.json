@@ -10,13 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/backend": "^2.29.0",
-    "node-pty": "^1.1.0",
-    "ws": "^8.18.3"
+    "@clerk/backend": "^2.29.0"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",
-    "@types/ws": "^8.18.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
