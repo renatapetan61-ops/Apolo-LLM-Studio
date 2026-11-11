@@ -46,8 +46,8 @@ android {
         applicationId = "com.apolo.llmstudio"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.1.2"
+        versionCode = 4
+        versionName = "0.1.3"
         buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\""+clerkKey+"\"")
         buildConfigField("boolean", "CLERK_CONFIGURED", clerkConfigured.toString())
         buildConfigField("String", "API_BASE_URL", "\""+apiBaseUrl+"\"")
