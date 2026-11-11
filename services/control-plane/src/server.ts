@@ -1,7 +1,5 @@
 import { createServer, type IncomingMessage } from "node:http";
 import os from "node:os";
-import pty from "node-pty";
-import { WebSocket, WebSocketServer } from "ws";
 import { verifyToken } from "@clerk/backend";
 
 const port = Number(process.env.PORT ?? 8080);
@@ -63,7 +61,6 @@ const server = createServer(async (req, res) => {
   res.end(JSON.stringify({ error: "not_found" }));
 });
 
-const sockets = new WebSocketServer({ noServer: true, maxPayload: 16 * 1024 });
 server.on("upgrade", async (req, socket) => {
   const url = new URL(req.url ?? "/", "http://localhost");
   if (url.pathname !== "/v1/terminal") {
