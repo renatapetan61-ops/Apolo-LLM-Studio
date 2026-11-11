@@ -30,7 +30,7 @@ The Android SDK integration follows the official [Clerk Android quickstart](http
 
 ## Local Android build
 
-From `android/` run `./gradlew assembleDebug`. Add the publishable key to local `gradle.properties` first. A placeholder is used only to allow CI compilation without a real credential.
+Open `android/` in Android Studio and build the `app` debug variant, or run `gradle -p android :app:assembleDebug` with Gradle 8.13+ installed. Add the publishable key to local `gradle.properties` first. A placeholder is used only to allow CI compilation without a real credential.
 
 ## Start the x86-64 development executor
 
