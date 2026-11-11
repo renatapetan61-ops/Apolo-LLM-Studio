@@ -10,6 +10,10 @@ val clerkPublishableKey = providers.gradleProperty("APOLO_CLERK_PUBLISHABLE_KEY"
     .orElse(providers.environmentVariable("APOLO_CLERK_PUBLISHABLE_KEY"))
     .orElse("")
 val clerkKey = clerkPublishableKey.get().trim()
+val apiBaseUrl = providers.gradleProperty("APOLO_API_BASE_URL")
+    .orElse(providers.environmentVariable("APOLO_API_BASE_URL"))
+    .orElse("https://apolo-llm-studio-api-production.up.railway.app")
+    .get().trim().trimEnd('/')
 val clerkConfigured = clerkKey.length > 20 &&
     (clerkKey.startsWith("pk_test_") || clerkKey.startsWith("pk_live_"))
 
@@ -42,10 +46,11 @@ android {
         applicationId = "com.apolo.llmstudio"
         minSdk = 24
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.1.2"
         buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\""+clerkKey+"\"")
         buildConfigField("boolean", "CLERK_CONFIGURED", clerkConfigured.toString())
+        buildConfigField("String", "API_BASE_URL", "\\\""+apiBaseUrl+"\\\"")
     }
 
     signingConfigs {
