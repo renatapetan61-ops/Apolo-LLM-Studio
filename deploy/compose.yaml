@@ -1,0 +1,28 @@
+services:
+  apolo-control-plane:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    platform: linux/amd64
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: "8080"
+      WORKSPACE_ROOT: /workspace
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - apolo-workspaces:/workspace
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    pids_limit: 256
+    mem_limit: 2g
+    cpus: 2.0
+
+volumes:
+  apolo-workspaces:
