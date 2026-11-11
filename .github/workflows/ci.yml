@@ -82,4 +82,4 @@ jobs:
           retention-days: 14
       - name: Remove signing material
         if: ${{ always() }}
-        run: rm -f android/apolo-upload.jks android/keystore.properties
+        run: rm -f android/apolo-upload.jks android/apolo-release.p12 android/keystore.properties
