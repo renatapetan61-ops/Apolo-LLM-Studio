@@ -17,7 +17,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
-        buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"\u0024{clerkPublishableKey.get()}\"")
+        buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"" + clerkPublishableKey.get() + "\"")
     }
     buildFeatures { compose = true; buildConfig = true }
     compileOptions {
