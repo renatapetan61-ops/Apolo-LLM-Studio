@@ -1,0 +1,15 @@
+**/build/
+.gradle/
+local.properties
+*.iml
+.idea/
+.DS_Store
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+coverage/
+data/
+workspaces/
+*.log
