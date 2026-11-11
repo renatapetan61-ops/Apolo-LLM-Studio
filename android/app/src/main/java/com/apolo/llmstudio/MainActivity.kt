@@ -119,6 +119,12 @@ private fun StudioHome() {
         }
         Text("Seu ambiente de desenvolvimento", color = Color.White, style = MaterialTheme.typography.titleMedium)
         Surface(color = Color(0xFF151E33), shape = RoundedCornerShape(16.dp)) {
+            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("API APOLO · RAILWAY", color = Color(0xFF77E0B5), style = MaterialTheme.typography.labelLarge)
+                Text(BuildConfig.API_BASE_URL, color = Color(0xFFE4EAF5))
+            }
+        }
+        Surface(color = Color(0xFF151E33), shape = RoundedCornerShape(16.dp)) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Terminal Linux x86-64", color = Color.White, style = MaterialTheme.typography.titleLarge)
                 Text("Executor remoto ainda precisa ser provisionado e conectado.", color = Color(0xFFB8C5DC))
