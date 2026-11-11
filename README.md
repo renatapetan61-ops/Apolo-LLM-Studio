@@ -37,6 +37,7 @@ Open `android/` in Android Studio and build the `app` debug variant, or run `gra
 On a Linux x86-64 server:
 
 ```bash
+bash deploy/preflight.sh
 cp deploy/.env.example deploy/.env
 # Edit deploy/.env locally; never commit it.
 docker compose -f deploy/compose.yaml up --build -d
