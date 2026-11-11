@@ -51,8 +51,23 @@ jobs:
         run: |
           set -euo pipefail
           printf '%s' "$APOLO_KEYSTORE_BASE64" | base64 --decode > android/apolo-upload.jks
-          printf 'storeFile=../apolo-upload.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
-            "$APOLO_STORE_PASSWORD" "$APOLO_KEY_ALIAS" "$APOLO_KEY_PASSWORD" \
+          test -s android/apolo-upload.jks
+          # Validate the supplied store password and alias before Gradle runs.
+          keytool -list -keystore android/apolo-upload.jks \
+            -storepass "$APOLO_STORE_PASSWORD" -alias "$APOLO_KEY_ALIAS" >/dev/null
+          # Normalize JKS/PKCS12 input into a PKCS12 keystore with one consistent password.
+          keytool -importkeystore -noprompt \
+            -srckeystore android/apolo-upload.jks \
+            -srcstorepass "$APOLO_STORE_PASSWORD" \
+            -srcalias "$APOLO_KEY_ALIAS" \
+            -srckeypass "$APOLO_KEY_PASSWORD" \
+            -destkeystore android/apolo-release.p12 \
+            -deststoretype PKCS12 \
+            -deststorepass "$APOLO_STORE_PASSWORD" \
+            -destkeypass "$APOLO_STORE_PASSWORD" \
+            -destalias "$APOLO_KEY_ALIAS"
+          printf 'storeFile=../apolo-release.p12\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$APOLO_STORE_PASSWORD" "$APOLO_KEY_ALIAS" "$APOLO_STORE_PASSWORD" \
             > android/keystore.properties
       - name: Build signed release APK
         if: ${{ env.APOLO_KEYSTORE_BASE64 != '' && env.APOLO_STORE_PASSWORD != '' && env.APOLO_KEY_ALIAS != '' && env.APOLO_KEY_PASSWORD != '' }}
