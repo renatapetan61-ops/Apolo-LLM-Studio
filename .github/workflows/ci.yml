@@ -50,13 +50,35 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          printf '%s' "$APOLO_KEYSTORE_BASE64" | base64 --decode > android/apolo-upload.jks
-          test -s android/apolo-upload.jks
-          # Validate the supplied store password and alias before Gradle runs.
-          keytool -list -keystore android/apolo-upload.jks \
-            -storepass "$APOLO_STORE_PASSWORD" -alias "$APOLO_KEY_ALIAS" >/dev/null
-          # Normalize JKS/PKCS12 input into a PKCS12 keystore with one consistent password.
-          keytool -importkeystore -noprompt \
+          echo "::group::Decode Android upload keystore"
+          if ! printf '%s' "$APOLO_KEYSTORE_BASE64" | base64 --decode > android/apolo-upload.jks; then
+            echo "::error::APOLO_KEYSTORE_BASE64 não contém Base64 válido."
+            exit 1
+          fi
+          if [ ! -s android/apolo-upload.jks ]; then
+            echo "::error::O keystore decodificado está vazio."
+            exit 1
+          fi
+          echo "Arquivo de assinatura decodificado."
+          echo "::endgroup::"
+
+          echo "::group::Validate PKCS12 keystore"
+          # keytool (Java 17+) cria PKCS12 por padrão quando -storetype não é informado.
+          # O segredo de senha da chave precisa coincidir com a senha do PKCS12.
+          if [ "$APOLO_KEY_PASSWORD" != "$APOLO_STORE_PASSWORD" ]; then
+            echo "::error::As secrets APOLO_KEY_PASSWORD e APOLO_STORE_PASSWORD são diferentes. Para este keystore PKCS12, use a mesma senha nas duas."
+            exit 1
+          fi
+          if ! keytool -list -storetype PKCS12 -keystore android/apolo-upload.jks \
+            -storepass "$APOLO_STORE_PASSWORD" -alias "$APOLO_KEY_ALIAS"; then
+            echo "::error::Não foi possível abrir o PKCS12 ou localizar o alias configurado. Confira a senha, o alias e o arquivo Base64."
+            exit 1
+          fi
+          echo "::endgroup::"
+
+          echo "::group::Normalize release keystore"
+          if ! keytool -importkeystore -noprompt \
+            -srcstoretype PKCS12 \
             -srckeystore android/apolo-upload.jks \
             -srcstorepass "$APOLO_STORE_PASSWORD" \
             -srcalias "$APOLO_KEY_ALIAS" \
@@ -65,7 +87,18 @@ jobs:
             -deststoretype PKCS12 \
             -deststorepass "$APOLO_STORE_PASSWORD" \
             -destkeypass "$APOLO_STORE_PASSWORD" \
-            -destalias "$APOLO_KEY_ALIAS"
+            -destalias "$APOLO_KEY_ALIAS"; then
+            echo "::error::Falha ao importar a chave privada do PKCS12. Verifique se o alias aponta para uma entrada de chave e se as senhas correspondem."
+            exit 1
+          fi
+          if ! keytool -list -storetype PKCS12 -keystore android/apolo-release.p12 \
+            -storepass "$APOLO_STORE_PASSWORD" -alias "$APOLO_KEY_ALIAS" >/dev/null; then
+            echo "::error::O keystore PKCS12 de destino não passou na validação."
+            exit 1
+          fi
+          echo "Keystore de Release validado."
+          echo "::endgroup::"
+
           printf 'storeFile=../apolo-release.p12\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
             "$APOLO_STORE_PASSWORD" "$APOLO_KEY_ALIAS" "$APOLO_STORE_PASSWORD" \
             > android/keystore.properties
