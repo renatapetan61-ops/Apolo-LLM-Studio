@@ -8,7 +8,10 @@ plugins {
 
 val clerkPublishableKey = providers.gradleProperty("APOLO_CLERK_PUBLISHABLE_KEY")
     .orElse(providers.environmentVariable("APOLO_CLERK_PUBLISHABLE_KEY"))
-    .orElse("pk_test_placeholder_for_ci")
+    .orElse("")
+val clerkKey = clerkPublishableKey.get().trim()
+val clerkConfigured = clerkKey.length > 20 &&
+    (clerkKey.startsWith("pk_test_") || clerkKey.startsWith("pk_live_"))
 
 val signingPropertiesFile = rootProject.file("keystore.properties")
 val signingProperties = Properties()
@@ -41,7 +44,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
-        buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\""+clerkPublishableKey.get()+"\"")
+        buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\""+clerkKey+"\"")
+        buildConfigField("boolean", "CLERK_CONFIGURED", clerkConfigured.toString())
     }
 
     signingConfigs {
