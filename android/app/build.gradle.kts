@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -8,17 +10,54 @@ val clerkPublishableKey = providers.gradleProperty("APOLO_CLERK_PUBLISHABLE_KEY"
     .orElse(providers.environmentVariable("APOLO_CLERK_PUBLISHABLE_KEY"))
     .orElse("pk_test_placeholder_for_ci")
 
+val signingPropertiesFile = rootProject.file("keystore.properties")
+val signingProperties = Properties()
+if (signingPropertiesFile.exists()) {
+    signingPropertiesFile.inputStream().use(signingProperties::load)
+}
+val hasReleaseSigning = signingPropertiesFile.exists() &&
+    listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+        .all { !signingProperties.getProperty(it).isNullOrBlank() }
+
+if (gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) } && !hasReleaseSigning) {
+    throw GradleException(
+        "Release signing is not configured. Create android/keystore.properties using keystore.properties.example."
+    )
+}
+
 android {
     namespace = "com.apolo.llmstudio"
     compileSdk = 36
+
     defaultConfig {
         applicationId = "com.apolo.llmstudio"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
-        buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"" + clerkPublishableKey.get() + "\"")
+        buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\""+clerkPublishableKey.get()+"\"")
     }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(signingProperties.getProperty("storeFile"))
+                storePassword = signingProperties.getProperty("storePassword")
+                keyAlias = signingProperties.getProperty("keyAlias")
+                keyPassword = signingProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+    }
+
     buildFeatures { compose = true; buildConfig = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
