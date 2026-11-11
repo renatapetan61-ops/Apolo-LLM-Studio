@@ -13,3 +13,6 @@ coverage/
 data/
 workspaces/
 *.log
+android/keystore.properties
+android/*.jks
+android/*.keystore
