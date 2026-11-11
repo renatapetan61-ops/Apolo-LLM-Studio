@@ -24,7 +24,8 @@ Android-first development environment with a real remote Linux x86-64 terminal.
 2. Register the Android application namespace/package: `com.apolo.llmstudio`.
 3. Put the Clerk **publishable key** in local `android/gradle.properties` as `APOLO_CLERK_PUBLISHABLE_KEY=pk_test_...` (do not commit it).
 4. Put the Clerk **secret key** in the server environment as `CLERK_SECRET_KEY`. Never put it in Android or source control.
-5. Configure `CLERK_AUTHORIZED_PARTIES` to the trusted app origins used by the deployment.
+5. For GitHub Actions Release builds, add the Clerk **publishable key** as the repository Actions secret `APOLO_CLERK_PUBLISHABLE_KEY`. The Android app checks the key before initializing Clerk; if it is absent, the app opens a setup screen instead of crashing. Never add the Clerk secret key to this Android secret or APK.
+6. Configure `CLERK_AUTHORIZED_PARTIES` to the trusted app origins used by the deployment.
 
 The Android SDK integration follows the official [Clerk Android quickstart](https://clerk.com/docs/android/getting-started/quickstart). SDK version pinned to 1.4.1.
 
