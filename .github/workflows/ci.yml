@@ -51,38 +51,9 @@ jobs:
         run: |
           set -euo pipefail
           printf '%s' "$APOLO_KEYSTORE_BASE64" | base64 --decode > android/apolo-upload.jks
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-
-          def escape(value):
-              result = []
-              for char in value:
-                  if char == "\\\\":
-                      result.append("\\\\\\\\")
-                  elif char in "=:#!":
-                      result.append("\\\\" + char)
-                  elif char == "\\t":
-                      result.append("\\\\t")
-                  elif char == "\\r":
-                      result.append("\\\\r")
-                  elif char == "\\n":
-                      result.append("\\\\n")
-                  else:
-                      result.append(char)
-              return "".join(result)
-
-          values = {
-              "storeFile": "../apolo-upload.jks",
-              "storePassword": os.environ["APOLO_STORE_PASSWORD"],
-              "keyAlias": os.environ["APOLO_KEY_ALIAS"],
-              "keyPassword": os.environ["APOLO_KEY_PASSWORD"],
-          }
-          Path("android/keystore.properties").write_text(
-              "".join(f"{key}={escape(value)}\\n" for key, value in values.items()),
-              encoding="utf-8",
-          )
-          PY
+          printf 'storeFile=../apolo-upload.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$APOLO_STORE_PASSWORD" "$APOLO_KEY_ALIAS" "$APOLO_KEY_PASSWORD" \
+            > android/keystore.properties
       - name: Build signed release APK
         if: ${{ env.APOLO_KEYSTORE_BASE64 != '' && env.APOLO_STORE_PASSWORD != '' && env.APOLO_KEY_ALIAS != '' && env.APOLO_KEY_PASSWORD != '' }}
         run: gradle -p android :app:assembleRelease
