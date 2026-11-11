@@ -39,6 +39,15 @@ jobs:
       APOLO_CLERK_PUBLISHABLE_KEY: ${{ secrets.APOLO_CLERK_PUBLISHABLE_KEY }}
     steps:
       - uses: actions/checkout@v4
+      - name: Validate Clerk Publishable Key
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$APOLO_CLERK_PUBLISHABLE_KEY" in
+            pk_test_*|pk_live_*) echo "Clerk Publishable Key configurada." ;;
+            *) echo "::error::APOLO_CLERK_PUBLISHABLE_KEY ausente ou inválida. Cadastre uma chave pk_test_ ou pk_live_ nos Actions Secrets."; exit 1 ;;
+          esac
       - name: Check signed release eligibility
         id: release-eligibility
         if: ${{ env.APOLO_KEYSTORE_BASE64 != '' && env.APOLO_STORE_PASSWORD != '' && env.APOLO_KEY_ALIAS != '' && env.APOLO_KEY_PASSWORD != '' }}
@@ -140,7 +149,7 @@ jobs:
           body: |
             APK Release assinado do Apolo LLM Studio.
 
-            - Versão Android: 0.1.0
+            - Versão Android: 0.1.1
             - Build do GitHub Actions: #${{ github.run_number }}
             - Commit: ${{ github.sha }}
           files: release-assets/app-release.apk
