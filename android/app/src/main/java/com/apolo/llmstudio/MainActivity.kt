@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,7 @@ import com.clerk.api.Clerk
 import com.clerk.ui.auth.AuthView
 import com.clerk.ui.userbutton.UserButton
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +66,7 @@ private enum class AuthState { Loading, SignedOut, SignedIn }
 
 @Composable
 private fun StudioHome() {
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF0B1020)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -97,7 +100,7 @@ private fun StudioHome() {
                 Text("A conexão será ativada após publicar e configurar a API x86-64.", color = Color(0xFF8291AA))
             }
         }
-        Button(onClick = { Clerk.auth.signOut() }, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = { scope.launch { Clerk.auth.signOut() } }, modifier = Modifier.fillMaxWidth()) {
             Text("Sair")
         }
     }
