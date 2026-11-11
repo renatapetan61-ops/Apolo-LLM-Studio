@@ -50,7 +50,7 @@ android {
         versionName = "0.1.2"
         buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\""+clerkKey+"\"")
         buildConfigField("boolean", "CLERK_CONFIGURED", clerkConfigured.toString())
-        buildConfigField("String", "API_BASE_URL", "\\\""+apiBaseUrl+"\\\"")
+        buildConfigField("String", "API_BASE_URL", "\""+apiBaseUrl+"\"")
     }
 
     signingConfigs {
